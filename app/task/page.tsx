@@ -30,6 +30,16 @@ export default function Task() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      await axios.delete("/api/deletetask", { data: { id } });
+      setTasks(tasks.filter((task) => task._id !== id));
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      alert("Failed to delete task");
+    }
+  };
+
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -79,6 +89,12 @@ export default function Task() {
                   <span className="text-gray-500 text-sm">
                     {new Date(task.createdAt).toLocaleDateString()}
                   </span>
+                  <button
+                    onClick={() => handleDelete(task._id)}
+                    className="bg-red-500 text-white font-bold rounded-sm px-2 py-1"
+                  >
+                    Delete
+                  </button>
                 </li>
               ))}
             </ul>
