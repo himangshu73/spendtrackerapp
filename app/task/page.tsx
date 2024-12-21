@@ -11,6 +11,7 @@ interface Task {
 export default function Task() {
   const [task, setTask] = useState<string>("");
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [editTaskId, setEditTaskId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -21,13 +22,29 @@ export default function Task() {
     }
 
     try {
-      const response = await axios.post("/api/addtask", { task: task });
-      setTasks([...tasks, response.data.task]);
+      if (editTaskId) {
+        const response = await axios.put("/api/updatetask", {
+          id: editTaskId,
+          task: task.trim(),
+        });
+        setTasks(
+          tasks.map((t) => (t._id === editTaskId ? response.data.task : t))
+        );
+        setEditTaskId(null);
+      } else {
+        const response = await axios.post("/api/addtask", { task: task });
+        setTasks([...tasks, response.data.task]);
+      }
       setTask("");
     } catch (error) {
-      console.log("Error adding task,", error);
-      alert("Error adding task");
+      console.log("Error submitting task,", error);
+      alert("Error submit task");
     }
+  };
+
+  const handleEdit = (id: string, currentTask: string) => {
+    setEditTaskId(id);
+    setTask(currentTask);
   };
 
   const handleDelete = async (id: string) => {
@@ -57,7 +74,7 @@ export default function Task() {
   return (
     <>
       <div className="mt-4 p-4">
-        <h1>Add Task</h1>
+        <h1>{editTaskId ? "Edit Task" : "Add Task"}</h1>
         <form className="mt-2" onSubmit={handleSubmit}>
           <input
             type="text"
@@ -70,7 +87,7 @@ export default function Task() {
             type="submit"
             className="bg-blue-500 text-white font-bold rounded-sm px-4 py-2 hover:bg-blue-600"
           >
-            Submit
+            {editTaskId ? "Update" : "Submit"}
           </button>
         </form>
 
@@ -89,6 +106,13 @@ export default function Task() {
                   <span className="text-gray-500 text-sm">
                     {new Date(task.createdAt).toLocaleDateString()}
                   </span>
+                  <button
+                    onClick={() => {
+                      handleEdit(task._id, task.task);
+                    }}
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => handleDelete(task._id)}
                     className="bg-red-500 text-white font-bold rounded-sm px-2 py-1"
