@@ -6,6 +6,7 @@ export interface ITask extends Document {
   completed: boolean;
   createdAt: Date;
   updatedAt: Date;
+  user: mongoose.Schema.Types.ObjectId;
 }
 
 const taskSchema: Schema<ITask> = new Schema({
@@ -27,6 +28,7 @@ const taskSchema: Schema<ITask> = new Schema({
     required: true,
     default: Date.now,
   },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 });
 
 const Task =

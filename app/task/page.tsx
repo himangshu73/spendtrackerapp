@@ -1,5 +1,6 @@
 "use client";
 import axios from "axios";
+import { useSession, signIn } from "next-auth/react";
 import { FormEvent, useState, useEffect } from "react";
 
 interface Task {
@@ -9,6 +10,7 @@ interface Task {
 }
 
 export default function Task() {
+  const { data: session, status } = useSession();
   const [task, setTask] = useState<string>("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [editTaskId, setEditTaskId] = useState<string | null>(null);
@@ -60,6 +62,7 @@ export default function Task() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
+        setLoading(true);
         const response = await axios.get("/api/showtask");
         setTasks(response.data.tasks);
       } catch (error) {
@@ -68,9 +71,25 @@ export default function Task() {
         setLoading(false);
       }
     };
-    fetchTasks();
-  }, []);
+    if (session) fetchTasks();
+  }, [session]);
 
+  if (status === "loading") {
+    return <p>Loading...</p>;
+  }
+  if (!session) {
+    return (
+      <div>
+        <p>You need to log in to manage tasks.</p>
+        <button
+          onClick={() => signIn()}
+          className="bg-blue-500 text-white px-4 py-2"
+        >
+          Sign In
+        </button>
+      </div>
+    );
+  }
   return (
     <>
       <div className="mt-4 p-4">
