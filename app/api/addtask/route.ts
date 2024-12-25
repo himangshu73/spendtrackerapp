@@ -8,7 +8,6 @@ export async function POST(request: Request) {
   try {
     await dbconnect();
     const session = await auth();
-    console.log(session);
     if (!session)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
