@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import dbconnect from "@/lib/dbConnect";
 import User from "./model/user";
+import Google from "next-auth/providers/google";
 
 declare module "next-auth" {
   interface Session {
@@ -19,7 +20,7 @@ declare module "next-auth" {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: [GitHub],
+  providers: [GitHub, Google],
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
@@ -35,7 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         } else {
           await User.updateOne({ email: user.email }, { name: user.name });
         }
-
+        console.log(dbUser);
         user.id = dbUser._id.toString();
 
         return true;
