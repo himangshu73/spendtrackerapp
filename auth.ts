@@ -32,6 +32,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           dbUser = await User.create({
             email: user.email,
             name: user.name,
+            image: user.image || "/avatar.jpg",
           });
         } else {
           await User.updateOne({ email: user.email }, { name: user.name });
