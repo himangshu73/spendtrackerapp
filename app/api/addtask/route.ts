@@ -2,7 +2,6 @@ import dbconnect from "@/lib/dbConnect";
 import Task from "@/model/task";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import User from "@/model/user";
 
 export async function POST(request: Request) {
   try {
@@ -13,18 +12,12 @@ export async function POST(request: Request) {
 
     const { task } = await request.json();
 
-    if (!session.user || !session.user.email) {
-      return NextResponse.json(
-        { message: "User email not found in session" },
-        { status: 400 }
-      );
-    }
+    const user = session.user;
 
-    const user = await User.findOne({ email: session.user.email });
     if (!user) {
       return NextResponse.json(
-        { message: "User not found in the database" },
-        { status: 404 }
+        { message: "User not found in session" },
+        { status: 400 }
       );
     }
 
@@ -35,7 +28,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const newTask = new Task({ task: task.trim(), user: user._id });
+    const newTask = new Task({ task: task.trim(), user: user.id });
     await newTask.save();
     return NextResponse.json({ task: newTask }, { status: 201 });
   } catch (error) {

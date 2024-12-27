@@ -1,6 +1,5 @@
 import dbconnect from "@/lib/dbConnect";
 import Task from "@/model/task";
-import User from "@/model/user";
 import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 
@@ -12,13 +11,7 @@ export async function GET(req: NextRequest) {
 
     if (!session)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    if (!session.user || !session.user.email) {
-      return NextResponse.json(
-        { message: "User email not found in session" },
-        { status: 400 }
-      );
-    }
-    const user = await User.findOne({ email: session.user.email });
+    const user = session.user;
 
     if (!user) {
       return NextResponse.json(
@@ -26,7 +19,7 @@ export async function GET(req: NextRequest) {
         { status: 404 }
       );
     }
-    const tasks = await Task.find({ user: user?._id });
+    const tasks = await Task.find({ user: user.id });
     return NextResponse.json({ tasks }, { status: 200 });
   } catch (error) {
     console.error("Error fetching tasks", error);
