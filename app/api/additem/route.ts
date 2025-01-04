@@ -7,44 +7,60 @@ export async function POST(req: Request) {
   try {
     await dbconnect();
 
+    // Authenticate user
     const session = await auth();
-
     if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { status: "error", message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    const user = session?.user;
-
+    const user = session.user;
     if (!user) {
       return NextResponse.json(
-        { message: "User not found in sessison" },
+        { status: "error", message: "User not found in session" },
         { status: 400 }
       );
     }
 
-    const { itemname, quantity, unit, price } = await req.json();
-
-    if (!itemname || !quantity || !unit || !price || itemname.trim() === "") {
+    // Parse and validate request body
+    const { itemname, quantity, unit, price, category } = await req.json();
+    if (!itemname?.trim() || !category?.trim()) {
       return NextResponse.json(
-        { message: "Item is required" },
+        { status: "error", message: "Item name and category are required" },
+        { status: 400 }
+      );
+    }
+    if (!quantity || !unit || !price) {
+      return NextResponse.json(
+        { status: "error", message: "Quantity, unit, and price are required" },
         { status: 400 }
       );
     }
 
+    // Create and save new item
     const newItem = new Item({
       itemname: itemname.trim(),
-      quantity: quantity,
-      unit: unit,
-      price: price,
+      category: category.trim(),
+      quantity,
+      unit,
+      price,
       user: user.id,
     });
 
     await newItem.save();
-    console.log("Item added successfully.");
+    console.info("Item added successfully:", newItem);
 
-    return NextResponse.json({ item: newItem }, { status: 201 });
+    return NextResponse.json(
+      { status: "success", item: newItem },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error("Error adding item.", error);
-    return NextResponse.json({ message: "Item add failed" }, { status: 500 });
+    console.error("Error adding item:", error);
+    return NextResponse.json(
+      { status: "error", message: "Failed to add item" },
+      { status: 500 }
+    );
   }
 }

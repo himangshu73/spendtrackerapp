@@ -6,7 +6,11 @@ export const itemSchema = z.object({
   itemname: z
     .string()
     .min(2, { message: "Item Name must be at least 2 characters." })
-    .max(50, { message: "Item name must not be more than 50 characters." }),
+    .max(20, { message: "Item name must not be more than 20 characters." }),
+  category: z
+    .string()
+    .min(2, { message: "Category must be at least 2 characters." })
+    .max(15, { message: "Category must not be more than 15 characters." }),
   quantity: z
     .string()
     .transform((value) => Number(value))

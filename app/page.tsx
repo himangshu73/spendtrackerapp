@@ -7,6 +7,12 @@ export default function Home() {
   return (
     <>
       <Link href="/task">Task</Link>
+      <Link
+        className="hover:cursor-pointer hover:text-red-500"
+        href="/spendtracker"
+      >
+        Spendtracker
+      </Link>
       <UserAvatar />
     </>
   );

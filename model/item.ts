@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 export interface InterItem extends Document {
   user: mongoose.Schema.Types.ObjectId;
   itemname: string;
+  category: string;
   quantity: number;
   unit: string;
   price: number;
@@ -14,6 +15,10 @@ export interface InterItem extends Document {
 const itemSchema: Schema<InterItem> = new Schema({
   user: { type: mongoose.Schema.Types.ObjectId },
   itemname: {
+    type: String,
+    required: true,
+  },
+  category: {
     type: String,
     required: true,
   },
