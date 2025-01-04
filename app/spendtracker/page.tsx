@@ -26,6 +26,7 @@ import {
 import axios from "axios";
 import { useSession, signIn } from "next-auth/react";
 import { useDebounce } from "use-debounce";
+import { Session } from "inspector/promises";
 
 type ItemType = z.infer<typeof itemSchema>;
 
@@ -50,8 +51,6 @@ const SpendTracker = () => {
       unit: "kg",
     },
   });
-
-  console.log(debouncedQuery);
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -107,6 +106,10 @@ const SpendTracker = () => {
     };
     fetchCategorySuggestions();
   }, [debouncedCategoryQuery]);
+
+  useEffect(() => {
+    console.log("Session Status:", status);
+  }, [status]);
 
   const onSubmit = async (values: ItemType) => {
     try {

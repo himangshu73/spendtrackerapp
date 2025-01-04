@@ -35,7 +35,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             image: user.image || "/avatar.jpg",
           });
         }
-        console.log(dbUser);
         user.id = dbUser._id.toString();
 
         return true;
