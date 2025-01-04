@@ -10,9 +10,7 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("query") || "";
-    console.log("Query Received:", query);
     const field = searchParams.get("field") || "";
-    console.log("Field Receied:", field);
 
     if (!ALLOWED_FIELDS.includes(field)) {
       return NextResponse.json(
