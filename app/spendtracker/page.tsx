@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,12 +25,12 @@ import {
 import axios from "axios";
 import { useSession, signIn } from "next-auth/react";
 import { useDebounce } from "use-debounce";
-import { Session } from "inspector/promises";
 
 type ItemType = z.infer<typeof itemSchema>;
 
 const SpendTracker = () => {
   const [items, setItems] = useState<ItemType[]>([]);
+  const [itemList, setItemList] = useState<ItemType[]>([]);
   const { data: session, status } = useSession();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [categorySuggestions, setCategorySuggestions] = useState<string[]>([]);
@@ -40,6 +39,7 @@ const SpendTracker = () => {
   const [debouncedQuery] = useDebounce(query, 300);
   const [debouncedCategoryQuery] = useDebounce(categoryQuery, 300);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const form = useForm<ItemType>({
     resolver: zodResolver(itemSchema),
@@ -107,8 +107,20 @@ const SpendTracker = () => {
   }, [debouncedCategoryQuery]);
 
   useEffect(() => {
-    console.log("Session Status:", status);
-  }, [status]);
+    const fetchItems = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get("/api/showitem");
+        console.log(response);
+        setItemList(response.data.item || []);
+      } catch (error) {
+        console.error("Error fetching items:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (session) fetchItems();
+  }, [session]);
 
   const onSubmit = async (values: ItemType) => {
     setSubmitting(true);
@@ -132,6 +144,19 @@ const SpendTracker = () => {
       setSubmitting(false);
     }
   };
+  // const handleDelete = async (id: string) => {
+  //   try {
+  //     setLoading(true);
+  //     await axios.delete(`/api/deleteitem`, { data: { id } });
+  //     setItemList((prevItemList) =>
+  //       prevItemList.filter((item) => item._id !== id)
+  //     );
+  //   } catch (error) {
+  //     console.error("Error deleting item:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   if (status === "loading") {
     return (
@@ -298,17 +323,52 @@ const SpendTracker = () => {
           </form>
         </Form>
 
+        {/* Items Display */}
         <div className="mt-6">
-          <h2 className="text-lg font-bold">Items:</h2>
-          <ul className="list-disc pl-6">
-            {items.map((item, index) => (
-              <li key={index} className="text-gray-700">
-                <strong>Name:</strong> {item.itemname},{" "}
-                <strong>Quantity:</strong> {item.quantity} {item.unit},{" "}
-                <strong>Price:</strong> ${item.price.toFixed(2)}
-              </li>
-            ))}
-          </ul>
+          <h2 className="text-lg font-bold mb-4">Items</h2>
+          {loading ? (
+            <p>Loading items...</p>
+          ) : itemList.length === 0 ? (
+            <p>No items available. Add some to get started!</p>
+          ) : (
+            <table className="min-w-full bg-white border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="py-2 px-4 text-left">#</th>
+                  <th className="py-2 px-4 text-left">Name</th>
+                  <th className="py-2 px-4 text-left">Category</th>
+                  <th className="py-2 px-4 text-left">Quantity</th>
+                  <th className="py-2 px-4 text-left">Unit</th>
+                  <th className="py-2 px-4 text-left">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {itemList.map((item, index) => (
+                  <tr
+                    key={index}
+                    className={`${
+                      index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                    } hover:bg-gray-100`}
+                  >
+                    <td className="py-2 px-4">{index + 1}</td>
+                    <td className="py-2 px-4">{item.itemname}</td>
+                    <td className="py-2 px-4">{item.category}</td>
+                    <td className="py-2 px-4">{item.quantity}</td>
+                    <td className="py-2 px-4">{item.unit}</td>
+                    <td className="py-2 px-4">${item.price.toFixed(2)}</td>
+                    {/* <td className="py-2 px-4">
+                      <button
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-50"
+                        onClick={() => handleDelete(item._id)}
+                      >
+                        Delete
+                      </button>
+                    </td> */}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     );
