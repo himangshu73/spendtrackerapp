@@ -39,15 +39,15 @@ const SpendTracker = () => {
   const [categoryQuery, setCategoryQuery] = useState<string>("");
   const [debouncedQuery] = useDebounce(query, 300);
   const [debouncedCategoryQuery] = useDebounce(categoryQuery, 300);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   const form = useForm<ItemType>({
     resolver: zodResolver(itemSchema),
     defaultValues: {
       itemname: "",
       category: "",
-      quantity: undefined,
-      price: undefined,
+      quantity: 0,
+      price: 0,
       unit: "kg",
     },
   });
@@ -60,7 +60,6 @@ const SpendTracker = () => {
         form.setValue("category", "");
         return;
       }
-
       try {
         const response = await axios.get(
           `/api/items/suggestions?query=${debouncedQuery}&field=itemname`
@@ -112,6 +111,7 @@ const SpendTracker = () => {
   }, [status]);
 
   const onSubmit = async (values: ItemType) => {
+    setSubmitting(true);
     try {
       const formattedvalues = {
         ...values,
@@ -128,6 +128,8 @@ const SpendTracker = () => {
       setCategoryQuery("");
     } catch (error) {
       console.error("Error saving item:", error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -290,7 +292,9 @@ const SpendTracker = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit">Submit</Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? "Submitting" : "Submit"}
+            </Button>
           </form>
         </Form>
 
