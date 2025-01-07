@@ -31,7 +31,6 @@ type ItemType = z.infer<typeof itemSchema>;
 
 const SpendTracker = () => {
   const [items, setItems] = useState<ItemType[]>([]);
-  const [itemList, setItemList] = useState([]);
   const { data: session, status } = useSession();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [categorySuggestions, setCategorySuggestions] = useState<string[]>([]);
@@ -43,7 +42,7 @@ const SpendTracker = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const form = useForm<ItemType>({
-    resolver: zodResolver(itemSchema),
+    resolver: zodResolver(itemSchema.omit({ _id: true })),
     defaultValues: {
       itemname: "",
       category: "",
@@ -142,19 +141,17 @@ const SpendTracker = () => {
       setSubmitting(false);
     }
   };
-  // const handleDelete = async (id: string) => {
-  //   try {
-  //     setLoading(true);
-  //     await axios.delete(`/api/deleteitem`, { data: { id } });
-  //     setItemList((prevItemList) =>
-  //       prevItemList.filter((item) => item._id !== id)
-  //     );
-  //   } catch (error) {
-  //     console.error("Error deleting item:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const handleDelete = async (id: string) => {
+    try {
+      setLoading(true);
+      await axios.delete(`/api/deleteitem`, { data: { id } });
+      setItems((prevItems) => prevItems.filter((item) => item._id !== id));
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (status === "loading") {
     return (
@@ -322,7 +319,11 @@ const SpendTracker = () => {
         </Form>
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {items.map((item, index) => (
-            <ItemCard key={index} item={item} />
+            <ItemCard
+              key={index}
+              item={item}
+              onDelete={() => handleDelete(item._id)}
+            />
           ))}
         </div>
       </div>

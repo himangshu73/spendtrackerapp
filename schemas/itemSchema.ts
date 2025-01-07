@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 export const itemSchema = z.object({
+  _id: z.string(),
   itemname: z
     .string()
     .min(2, { message: "Item Name must be at least 2 characters." })
