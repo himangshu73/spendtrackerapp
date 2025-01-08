@@ -12,8 +12,8 @@ export const itemSchema = z.object({
     .string()
     .min(2, { message: "Category must be at least 2 characters." })
     .max(15, { message: "Category must not be more than 15 characters." }),
-  quantity: z.number({ message: "Quantity must be number" }),
-  price: z.number({ message: "Price must be number" }),
+  quantity: z.number().positive({ message: "Quantity must be greater than 0" }),
+  price: z.number().positive({ message: "Price must be greater than 0" }),
   unit: z.enum(["kg", "ltr", "pc"], {
     errorMap: () => ({ message: "Unit must be one of: kg, ltr, pc." }),
   }),

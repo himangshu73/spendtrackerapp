@@ -122,8 +122,8 @@ const SpendTracker = () => {
   }, []);
 
   const onSubmit = async (values: ItemType) => {
-    setSubmitting(true);
     if (isEditing && editingItemId) {
+      setSubmitting(true);
       try {
         const response = await axios.put(`/api/updateitem`, {
           ...values,
@@ -141,6 +141,7 @@ const SpendTracker = () => {
         setSubmitting(false);
       }
     } else {
+      setSubmitting(true);
       try {
         const formattedvalues = {
           ...values,
@@ -369,7 +370,11 @@ const SpendTracker = () => {
             />
             <div className="flex gap-4">
               <Button type="submit">
-                {isEditing ? "Update Item" : "Add Item"}
+                {isEditing ? (
+                  <div>{submitting ? "Updating" : "Update"}</div>
+                ) : (
+                  <div>{submitting ? "Submitting" : "Submit"}</div>
+                )}
               </Button>
               {isEditing && (
                 <Button type="button" variant="outline" onClick={resetForm}>
