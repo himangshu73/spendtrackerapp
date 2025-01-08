@@ -1,4 +1,5 @@
 import { FaDeleteLeft } from "react-icons/fa6";
+import { CiEdit } from "react-icons/ci";
 
 interface Item {
   _id: string;
@@ -11,9 +12,11 @@ interface Item {
 export default function ItemCard({
   item,
   onDelete,
+  updateItem,
 }: {
   item: Item;
   onDelete: () => void;
+  updateItem: () => void;
 }) {
   return (
     <div className="relative bg-gray-200 max-w-96 rounded-md shadow-md border p-2">
@@ -23,6 +26,13 @@ export default function ItemCard({
         aria-label="Delete"
       >
         <FaDeleteLeft />
+      </button>
+      <button
+        onClick={updateItem}
+        className="absolute bottom-2 right-2 text-blue-500 hover:text-blue-700 "
+        aria-label="Edit"
+      >
+        <CiEdit />
       </button>
       <div>{item.itemname}</div>
       <div>

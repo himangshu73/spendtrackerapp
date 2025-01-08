@@ -8,24 +8,13 @@ export async function PUT(req: NextRequest) {
   try {
     await dbconnect();
     const { name, username, dob, sex } = await req.json();
-    console.log("Username received", name);
 
     const session = await auth();
-    console.log("session", session);
 
     if (!session)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    // const user = session.user;
-
-    // if (!user) {
-    //   return NextResponse.json(
-    //     { message: "User not found in the database" },
-    //     { status: 404 }
-    //   );
-    // }
 
     const userId = session.user.id;
-    console.log("UserId:", userId);
 
     if (!name && !username && !dob && !sex) {
       return NextResponse.json(

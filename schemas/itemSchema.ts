@@ -12,18 +12,8 @@ export const itemSchema = z.object({
     .string()
     .min(2, { message: "Category must be at least 2 characters." })
     .max(15, { message: "Category must not be more than 15 characters." }),
-  quantity: z
-    .string()
-    .transform((value) => Number(value))
-    .refine((value) => !isNaN(value) && value > 0, {
-      message: "Quantity must be a positive number",
-    }),
-  price: z
-    .string()
-    .transform((value) => Number(value))
-    .refine((value) => !isNaN(value) && value > 0, {
-      message: "Price must be a positive number.",
-    }),
+  quantity: z.number({ message: "Quantity must be number" }),
+  price: z.number({ message: "Price must be number" }),
   unit: z.enum(["kg", "ltr", "pc"], {
     errorMap: () => ({ message: "Unit must be one of: kg, ltr, pc." }),
   }),

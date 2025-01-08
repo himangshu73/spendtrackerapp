@@ -31,6 +31,8 @@ type ItemType = z.infer<typeof itemSchema>;
 
 const SpendTracker = () => {
   const [items, setItems] = useState<ItemType[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const { data: session, status } = useSession();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [categorySuggestions, setCategorySuggestions] = useState<string[]>([]);
@@ -121,27 +123,74 @@ const SpendTracker = () => {
 
   const onSubmit = async (values: ItemType) => {
     setSubmitting(true);
-    try {
-      const formattedvalues = {
-        ...values,
-        itemname:
-          values.itemname.charAt(0).toUpperCase() + values.itemname.slice(1),
-        category:
-          values.category.charAt(0).toUpperCase() + values.category.slice(1),
-      };
+    if (isEditing && editingItemId) {
+      try {
+        const response = await axios.put(`/api/updateitem`, {
+          ...values,
+          _id: editingItemId,
+        });
+        setItems((prevItems) =>
+          prevItems.map((item) =>
+            item._id === editingItemId ? { ...item, ...values } : item
+          )
+        );
+        resetForm();
+      } catch (error) {
+        console.error("Error updating item:", error);
+      } finally {
+        setSubmitting(false);
+      }
+    } else {
+      try {
+        const formattedvalues = {
+          ...values,
+          quantity: Number(values.quantity),
+          price: Number(values.price),
+          itemname:
+            values.itemname.charAt(0).toUpperCase() + values.itemname.slice(1),
+          category:
+            values.category.charAt(0).toUpperCase() + values.category.slice(1),
+        };
 
-      const response = await axios.post("/api/additem", formattedvalues);
-      setItems((prevItems) => [formattedvalues, ...prevItems]);
-      form.reset();
-      setQuery("");
-      setCategoryQuery("");
-    } catch (error) {
-      console.error("Error saving item:", error);
-    } finally {
-      setSubmitting(false);
+        const response = await axios.post("/api/additem", formattedvalues);
+        setItems((prevItems) => [formattedvalues, ...prevItems]);
+        form.reset();
+        setQuery("");
+        setCategoryQuery("");
+      } catch (error) {
+        console.error("Error saving item:", error);
+      } finally {
+        setSubmitting(false);
+      }
     }
   };
-  const handleDelete = async (id: string) => {
+
+  const handleEdit = (item: ItemType) => {
+    setIsEditing(true);
+    setEditingItemId(item._id || null);
+    setQuery(item.itemname);
+    console.log("Editing item:", item);
+    form.setValue("itemname", item.itemname);
+    form.setValue("category", item.category);
+    form.setValue("quantity", item.quantity);
+    form.setValue("price", item.price);
+    form.setValue("unit", item.unit);
+  };
+
+  const resetForm = () => {
+    form.reset({
+      itemname: "",
+      category: "",
+      quantity: 0,
+      price: 0,
+      unit: "kg",
+    });
+    setIsEditing(false);
+    setEditingItemId(null);
+    setQuery("");
+  };
+
+  const handleDeleteItem = async (id: string) => {
     try {
       setLoading(true);
       await axios.delete(`/api/deleteitem`, { data: { id } });
@@ -266,6 +315,7 @@ const SpendTracker = () => {
                         type="number"
                         placeholder="Quantity"
                         {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       ></Input>
                     </FormControl>
                     <FormMessage />
@@ -306,15 +356,27 @@ const SpendTracker = () => {
                 <FormItem>
                   <FormLabel>Price</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Price" {...field}></Input>
+                    <Input
+                      type="number"
+                      placeholder="Price"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    ></Input>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Submitting" : "Submit"}
-            </Button>
+            <div className="flex gap-4">
+              <Button type="submit">
+                {isEditing ? "Update Item" : "Add Item"}
+              </Button>
+              {isEditing && (
+                <Button type="button" variant="outline" onClick={resetForm}>
+                  Cancel
+                </Button>
+              )}
+            </div>
           </form>
         </Form>
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -322,7 +384,8 @@ const SpendTracker = () => {
             <ItemCard
               key={index}
               item={item}
-              onDelete={() => handleDelete(item._id)}
+              onDelete={() => handleDeleteItem(item._id)}
+              updateItem={() => handleEdit(item)}
             />
           ))}
         </div>
