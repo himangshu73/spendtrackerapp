@@ -34,12 +34,12 @@ export default function ItemCard({
       >
         <CiEdit />
       </button>
-      <div>{item.itemname}</div>
+      <div className="font-bold">{item.itemname}</div>
       <div>
-        {item.quantity}
+        Quantity: {item.quantity}
         {item.unit}
       </div>
-      <div>{item.price}</div>
+      <div>Price: {item.price} taka</div>
     </div>
   );
 }

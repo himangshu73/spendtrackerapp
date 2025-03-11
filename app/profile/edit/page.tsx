@@ -35,7 +35,7 @@ const EditProfile = () => {
     setFormData({ ...formData, [name]: value });
   };
   return (
-    <div className="max-w-md mx-auto p-4 border rounded shadow-md">
+    <div className="max-w-md mt-8 mx-auto p-4 border rounded shadow-md">
       <h1 className="text-xl font-bold mb-4">Edit Profile</h1>
       {message && <p className="mb-4 text-green-600">{message}</p>}
       <form onSubmit={handleSubmit}>

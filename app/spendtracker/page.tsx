@@ -26,6 +26,11 @@ import axios from "axios";
 import { useSession, signIn } from "next-auth/react";
 import { useDebounce } from "use-debounce";
 import ItemCard from "@/components/ItemCard";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 
 type ItemType = z.infer<typeof itemSchema>;
 
@@ -42,6 +47,7 @@ const SpendTracker = () => {
   const [debouncedCategoryQuery] = useDebounce(categoryQuery, 300);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [totalCost, setTotalCost] = useState(0);
 
   const form = useForm<ItemType>({
     resolver: zodResolver(itemSchema.omit({ _id: true })),
@@ -53,6 +59,19 @@ const SpendTracker = () => {
       unit: "kg",
     },
   });
+
+  useEffect(() => {
+    const fetchTotals = async () => {
+      try {
+        const response = await axios.get("/api/calculateitem");
+        setTotalCost(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error("Error fetching totals:", error);
+      }
+    };
+    fetchTotals();
+  }, [items]);
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -122,13 +141,21 @@ const SpendTracker = () => {
   }, []);
 
   const onSubmit = async (values: ItemType) => {
+    console.log("Submitting form with values: ", values);
+    console.log("Is Editing:", isEditing);
+    console.log("Editing Item ID:", editingItemId);
+
     if (isEditing && editingItemId) {
       setSubmitting(true);
       try {
+        console.log("Updating item...");
         const response = await axios.put(`/api/updateitem`, {
           ...values,
           _id: editingItemId,
         });
+
+        console.log("Update Response: ", response.data);
+
         setItems((prevItems) =>
           prevItems.map((item) =>
             item._id === editingItemId ? { ...item, ...values } : item
@@ -143,6 +170,7 @@ const SpendTracker = () => {
     } else {
       setSubmitting(true);
       try {
+        console.log("Adding Items...");
         const formattedvalues = {
           ...values,
           quantity: Number(values.quantity),
@@ -167,6 +195,7 @@ const SpendTracker = () => {
   };
 
   const handleEdit = (item: ItemType) => {
+    console.log("Editing item:", item);
     setIsEditing(true);
     setEditingItemId(item._id || null);
     setQuery(item.itemname);
@@ -222,7 +251,10 @@ const SpendTracker = () => {
     return (
       <div className="p-4">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8 max-w-96"
+          >
             <FormField
               control={form.control}
               name="itemname"
@@ -384,7 +416,8 @@ const SpendTracker = () => {
             </div>
           </form>
         </Form>
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div>Total Cost: {totalCost.totalCost}</div>
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 ">
           {items.map((item, index) => (
             <ItemCard
               key={index}

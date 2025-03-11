@@ -54,8 +54,7 @@ export async function PUT(req: NextRequest) {
         quantity,
         unit,
         price,
-      },
-      { new: true }
+      }
     );
 
     if (!updatedItem) {

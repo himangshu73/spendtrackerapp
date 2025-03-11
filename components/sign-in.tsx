@@ -3,7 +3,7 @@ import { signIn } from "@/auth";
 export default function SignIn() {
   return (
     <form
-      action={async () => {
+      action={async (formData) => {
         "use server";
         await signIn();
       }}

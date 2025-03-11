@@ -3,6 +3,7 @@ import GitHub from "next-auth/providers/github";
 import dbconnect from "@/lib/dbConnect";
 import User from "./model/user";
 import Google from "next-auth/providers/google";
+import Resend from "next-auth/providers/resend";
 
 declare module "next-auth" {
   interface Session {
