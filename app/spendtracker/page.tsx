@@ -48,7 +48,7 @@ const SpendTracker = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [totalCost, setTotalCost] = useState(0);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState({});
 
   const form = useForm<ItemType>({
     resolver: zodResolver(itemSchema.omit({ _id: true })),
@@ -65,13 +65,15 @@ const SpendTracker = () => {
     const fetchTotals = async () => {
       try {
         const response = await axios.get("/api/calculateitem");
-        setTotalCost(response.data.totalCost);
-        setCategories(response.data.userCategory);
+        setTotalCost(response.data.totalCost || 0);
+        setCategories(response.data.costPerCategory || {});
         console.log(response.data.totalCost);
-        console.log(response.data.userCategory);
+        console.log(response.data.costPerCategory);
         console.log(totalCost);
+        console.log(categories);
       } catch (error) {
         console.error("Error fetching totals:", error);
+        setCategories({});
       }
     };
     fetchTotals();
@@ -420,15 +422,37 @@ const SpendTracker = () => {
             </div>
           </form>
         </Form>
-        <div>Total Cost: {totalCost}</div>
-        <div>
-          Categories:{" "}
-          <ul>
-            {categories.map((category, index) => (
-              <li key={index}>{category}</li>
-            ))}
-          </ul>
+        <div className="max-w-lg mx-auto bg-white p-6 shadow-lg rounded-lg">
+          {/* Total Cost Section */}
+          <div className="text-xl font-semibold text-gray-800 mb-4">
+            💰 Total Cost: <span className="text-green-600">${totalCost}</span>
+          </div>
+
+          {/* Categories Section */}
+          <div>
+            <h2 className="text-lg font-medium text-gray-700 mb-2">
+              📊 Cost Per Category:
+            </h2>
+            {Object.keys(categories).length > 0 ? (
+              <ul className="space-y-2">
+                {Object.entries(categories).map(([category, cost]) => (
+                  <li
+                    key={category}
+                    className="flex justify-between bg-gray-100 px-4 py-2 rounded-md shadow-sm"
+                  >
+                    <span className="font-medium text-gray-700">
+                      {category}
+                    </span>
+                    <span className="text-blue-600 font-semibold">${cost}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">No categories found.</p>
+            )}
+          </div>
         </div>
+
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 ">
           {items.map((item, index) => (
             <ItemCard

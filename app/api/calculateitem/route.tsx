@@ -28,6 +28,21 @@ export async function GET(req: NextRequest) {
 
     console.log(userCategory);
 
+    const categoryCosts = await Item.aggregate([
+      { $match: { user: new mongoose.Types.ObjectId(userId) } },
+      { $group: { _id: "$category", totalCost: { $sum: "$price" } } },
+    ]).exec();
+
+    console.log(categoryCosts);
+
+    const costPerCategory = categoryCosts.reduce((acc, curr) => {
+      acc[curr._id] = curr.totalCost;
+      console.log(acc);
+      return acc;
+    }, {});
+
+    console.log(costPerCategory);
+
     const totalCostResult = await Item.aggregate([
       { $match: { user: new mongoose.Types.ObjectId(userId) } },
       { $group: { _id: null, totalCost: { $sum: "$price" } } },
@@ -38,7 +53,7 @@ export async function GET(req: NextRequest) {
 
     console.log(totalCost);
 
-    return NextResponse.json({ totalCost, userCategory }, { status: 200 });
+    return NextResponse.json({ totalCost, costPerCategory }, { status: 200 });
   } catch (error) {
     console.error("Error fetching total cost:", error);
     return NextResponse.json(
