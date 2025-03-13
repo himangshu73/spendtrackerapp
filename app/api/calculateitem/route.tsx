@@ -22,22 +22,23 @@ export async function GET(req: NextRequest) {
     const userId = user.id;
     console.log(userId);
 
-    const totalCostForUser = async (userId: string) => {
-      const result = await Item.aggregate([
-        { $match: { user: new mongoose.Types.ObjectId(userId) } },
-        { $group: { _id: null, totalCost: { $sum: "$price" } } },
-      ]).exec();
-      console.log(result);
-      console.log(result.length);
-      console.log(result[0].totalCost);
+    const userCategory = await Item.distinct("category", {
+      user: new mongoose.Types.ObjectId(userId),
+    });
 
-      return result.length > 0 ? result[0].totalCost : 0;
-    };
-    const totalCost = await totalCostForUser(userId);
+    console.log(userCategory);
+
+    const totalCostResult = await Item.aggregate([
+      { $match: { user: new mongoose.Types.ObjectId(userId) } },
+      { $group: { _id: null, totalCost: { $sum: "$price" } } },
+    ]).exec();
+
+    const totalCost =
+      totalCostResult.length > 0 ? totalCostResult[0].totalCost : 0;
 
     console.log(totalCost);
 
-    return NextResponse.json({ totalCost }, { status: 200 });
+    return NextResponse.json({ totalCost, userCategory }, { status: 200 });
   } catch (error) {
     console.error("Error fetching total cost:", error);
     return NextResponse.json(

@@ -48,6 +48,7 @@ const SpendTracker = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [totalCost, setTotalCost] = useState(0);
+  const [categories, setCategories] = useState([]);
 
   const form = useForm<ItemType>({
     resolver: zodResolver(itemSchema.omit({ _id: true })),
@@ -64,8 +65,11 @@ const SpendTracker = () => {
     const fetchTotals = async () => {
       try {
         const response = await axios.get("/api/calculateitem");
-        setTotalCost(response.data);
-        console.log(response.data);
+        setTotalCost(response.data.totalCost);
+        setCategories(response.data.userCategory);
+        console.log(response.data.totalCost);
+        console.log(response.data.userCategory);
+        console.log(totalCost);
       } catch (error) {
         console.error("Error fetching totals:", error);
       }
@@ -416,7 +420,15 @@ const SpendTracker = () => {
             </div>
           </form>
         </Form>
-        <div>Total Cost: {totalCost.totalCost}</div>
+        <div>Total Cost: {totalCost}</div>
+        <div>
+          Categories:{" "}
+          <ul>
+            {categories.map((category, index) => (
+              <li key={index}>{category}</li>
+            ))}
+          </ul>
+        </div>
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 ">
           {items.map((item, index) => (
             <ItemCard
