@@ -20,28 +20,21 @@ export async function GET(req: NextRequest) {
         { status: 404 }
       );
     const userId = user.id;
-    console.log(userId);
 
     const userCategory = await Item.distinct("category", {
       user: new mongoose.Types.ObjectId(userId),
     });
 
-    console.log(userCategory);
-
     const categoryCosts = await Item.aggregate([
       { $match: { user: new mongoose.Types.ObjectId(userId) } },
       { $group: { _id: "$category", totalCost: { $sum: "$price" } } },
+      { $sort: { totalCost: -1 } },
     ]).exec();
-
-    console.log(categoryCosts);
 
     const costPerCategory = categoryCosts.reduce((acc, curr) => {
       acc[curr._id] = curr.totalCost;
-      console.log(acc);
       return acc;
     }, {});
-
-    console.log(costPerCategory);
 
     const totalCostResult = await Item.aggregate([
       { $match: { user: new mongoose.Types.ObjectId(userId) } },
@@ -51,9 +44,19 @@ export async function GET(req: NextRequest) {
     const totalCost =
       totalCostResult.length > 0 ? totalCostResult[0].totalCost : 0;
 
-    console.log(totalCost);
+    const costlyItem = await Item.aggregate([
+      { $match: { user: new mongoose.Types.ObjectId(userId) } },
+      { $group: { _id: "$itemname", maxAmount: { $max: "$price" } } },
+      { $sort: { maxAmount: -1 } },
+      { $limit: 1 },
+    ]);
 
-    return NextResponse.json({ totalCost, costPerCategory }, { status: 200 });
+    const expensiveItem = costlyItem[0];
+
+    return NextResponse.json(
+      { totalCost, costPerCategory, expensiveItem },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error fetching total cost:", error);
     return NextResponse.json(

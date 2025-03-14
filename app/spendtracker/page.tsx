@@ -49,6 +49,7 @@ const SpendTracker = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [totalCost, setTotalCost] = useState(0);
   const [categories, setCategories] = useState({});
+  const [costlyItem, setCostlyItem] = useState({});
 
   const form = useForm<ItemType>({
     resolver: zodResolver(itemSchema.omit({ _id: true })),
@@ -67,10 +68,7 @@ const SpendTracker = () => {
         const response = await axios.get("/api/calculateitem");
         setTotalCost(response.data.totalCost || 0);
         setCategories(response.data.costPerCategory || {});
-        console.log(response.data.totalCost);
-        console.log(response.data.costPerCategory);
-        console.log(totalCost);
-        console.log(categories);
+        setCostlyItem(response.data.expensiveItem || {});
       } catch (error) {
         console.error("Error fetching totals:", error);
         setCategories({});
@@ -426,6 +424,27 @@ const SpendTracker = () => {
           {/* Total Cost Section */}
           <div className="text-xl font-semibold text-gray-800 mb-4">
             💰 Total Cost: <span className="text-green-600">${totalCost}</span>
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200 max-w-md mx-auto">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              💰 Expensive Purchase
+            </h2>
+            {costlyItem ? (
+              <div className="mt-4 text-center">
+                <p className="text-lg font-medium text-gray-700">
+                  <span className="text-blue-600 font-semibold">
+                    {costlyItem._id}
+                  </span>
+                </p>
+                <p className="text-3xl font-bold text-green-600 mt-2">
+                  ${costlyItem.maxAmount}
+                </p>
+              </div>
+            ) : (
+              <p className="text-gray-500 mt-4 text-center">
+                No data available
+              </p>
+            )}
           </div>
 
           {/* Categories Section */}
