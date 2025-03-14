@@ -1,3 +1,5 @@
+export const dynamic = "force-static";
+
 import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
