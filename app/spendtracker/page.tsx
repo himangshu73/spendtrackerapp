@@ -253,7 +253,7 @@ const SpendTracker = () => {
   }
   if (status === "authenticated") {
     return (
-      <div className="p-4">
+      <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200 max-w-lg mx-auto">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -420,31 +420,29 @@ const SpendTracker = () => {
             </div>
           </form>
         </Form>
-        <div className="max-w-lg mx-auto bg-white p-6 shadow-lg rounded-lg">
+        <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200 max-w-lg mx-auto">
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 text-center">
+            💰 Expensive Purchase
+          </h2>
+          {costlyItem ? (
+            <div className="mt-4 text-center">
+              <p className="text-lg font-medium text-gray-700">
+                <span className="text-blue-600 font-semibold">
+                  {costlyItem._id}
+                </span>
+              </p>
+              <p className="text-3xl font-bold text-green-600 mt-2">
+                ${costlyItem.maxAmount}
+              </p>
+            </div>
+          ) : (
+            <p className="text-gray-500 mt-4 text-center">No data available</p>
+          )}
+        </div>
+        <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200 max-w-lg mx-auto mt-4">
           {/* Total Cost Section */}
           <div className="text-xl font-semibold text-gray-800 mb-4">
             💰 Total Cost: <span className="text-green-600">${totalCost}</span>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200 max-w-md mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              💰 Expensive Purchase
-            </h2>
-            {costlyItem ? (
-              <div className="mt-4 text-center">
-                <p className="text-lg font-medium text-gray-700">
-                  <span className="text-blue-600 font-semibold">
-                    {costlyItem._id}
-                  </span>
-                </p>
-                <p className="text-3xl font-bold text-green-600 mt-2">
-                  ${costlyItem.maxAmount}
-                </p>
-              </div>
-            ) : (
-              <p className="text-gray-500 mt-4 text-center">
-                No data available
-              </p>
-            )}
           </div>
 
           {/* Categories Section */}
@@ -472,7 +470,7 @@ const SpendTracker = () => {
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 ">
+        <div className="mt-4 ">
           {items.map((item, index) => (
             <ItemCard
               key={index}

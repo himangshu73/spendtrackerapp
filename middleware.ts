@@ -9,11 +9,10 @@ export async function middleware(request: NextRequest) {
     const url = new URL("/", request.url);
     return NextResponse.redirect(url);
   }
-  return NextResponse.next()
+  return NextResponse.next();
 }
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/spendtracker","/task",]
-
+  matcher: ["/spendtracker", "/task", "/profile/:path*"],
 };

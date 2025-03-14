@@ -19,7 +19,7 @@ export default function ItemCard({
   updateItem: () => void;
 }) {
   return (
-    <div className="relative bg-white rounded-xl shadow-lg border border-gray-200 p-4 transition-transform transform hover:scale-105 hover:shadow-2xl">
+    <div className="mb-4 relative bg-white rounded-xl shadow-lg border border-gray-200 p-4 transition-transform transform hover:scale-105 hover:shadow-2xl">
       <button
         onClick={onDelete}
         className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors"
